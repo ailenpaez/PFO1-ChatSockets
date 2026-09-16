@@ -24,17 +24,17 @@ def conectar_servidor():
 def enviar_mensajes(cliente):
     """
     Permite enviar múltiples mensajes hasta
-    que el usuario escriba 'babai'.
+    que el usuario escriba 'éxito'.
     """
 
     while True:
 
         mensaje = input(
             "\nEscribí un mensaje "
-            "(o 'babai' para salir): "
+            "(o 'éxito' para salir): "
         ).strip()
 
-        if mensaje.lower() == "babai":
+        if mensaje.lower() == "éxito":
 
             print("Cerrando cliente...")
 
