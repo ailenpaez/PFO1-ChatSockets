@@ -24,6 +24,9 @@ def inicializar_socket():
     # socket escuchando
     servidor.listen()
 
+    # evita que accept() quede bloqueado indefinidamente
+    servidor.settimeout(1.0)
+
     return servidor
 
 
@@ -42,6 +45,7 @@ def atender_cliente(conexion, direccion):
         while True:
 
             try:
+
                 # esperando datos del cliente
                 datos = conexion.recv(BUFFER_SIZE)
 
@@ -55,7 +59,7 @@ def atender_cliente(conexion, direccion):
                 if not mensaje:
                     continue
 
-                # generar fecha/hora de recepcón del mensaje
+                # generar fecha/hora de recepción del mensaje
                 timestamp = datetime.now().strftime(
                     "%Y-%m-%d %H:%M:%S"
                 )
@@ -72,7 +76,7 @@ def atender_cliente(conexion, direccion):
                     f"{ip_cliente}: {mensaje}"
                 )
 
-                # respuesta solicitada 
+                # respuesta solicitada
                 respuesta = (
                     f"Mensaje recibido: {timestamp}"
                 )
@@ -88,9 +92,13 @@ def atender_cliente(conexion, direccion):
                     error
                 )
 
-                conexion.sendall(
-                    "Error al guardar el mensaje".encode("utf-8")
-                )
+                try:
+                    conexion.sendall(
+                        "Error al guardar el mensaje".encode("utf-8")
+                    )
+
+                except OSError:
+                    pass
 
                 break
 
@@ -99,6 +107,15 @@ def atender_cliente(conexion, direccion):
                 print(
                     f"El cliente {direccion} "
                     "cerró inesperadamente la conexión."
+                )
+
+                break
+
+            except OSError as error:
+
+                print(
+                    f"Error de comunicación con {direccion}:",
+                    error
                 )
 
                 break
@@ -112,17 +129,26 @@ def aceptar_conexiones(servidor):
     print("=" * 50)
     print("Servidor iniciado")
     print(f"Escuchando en {HOST}:{PORT}")
+    print("Presioná Ctrl + C para detenerlo")
     print("=" * 50)
 
     while True:
 
-        # accept() espera hasta que aparezca un cliente.
-        conexion, direccion = servidor.accept()
+        try:
 
-        atender_cliente(
-            conexion,
-            direccion
-        )
+            # accept() espera hasta que aparezca un cliente.
+            conexion, direccion = servidor.accept()
+
+            atender_cliente(
+                conexion,
+                direccion
+            )
+
+        except socket.timeout:
+
+            # si no aparece un cliente en 1 segundo,
+            # vuelve a escuchar conexiones
+            continue
 
 
 def main():

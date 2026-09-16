@@ -48,12 +48,10 @@ def enviar_mensajes(cliente):
 
             continue
 
-        # Enviar mensaje al servidor.
         cliente.sendall(
             mensaje.encode("utf-8")
         )
 
-        # Esperar respuesta del servidor.
         respuesta = cliente.recv(
             BUFFER_SIZE
         )
