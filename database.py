@@ -1,6 +1,12 @@
 import sqlite3
+import threading
 
 from config import DATA_DIR, DB_PATH
+
+# exclusión mutua -> garantiza que un solo hilo
+# escriba en la base de datos a la vez
+db_lock = threading.Lock()
+
 
 def inicializar_db():
     """
@@ -43,27 +49,29 @@ def guardar_mensaje(contenido, fecha_envio, ip_cliente):
     en la base de datos SQLite.
     """
 
-    conexion = sqlite3.connect(DB_PATH)
+    # sección crítica: todos los hilos comparten
+    # el mismo archivo chat.db
+    with db_lock:
 
-    try:
-        cursor = conexion.cursor()
+        conexion = sqlite3.connect(DB_PATH)
 
-        cursor.execute("""
-            INSERT INTO mensajes (
+        try:
+            cursor = conexion.cursor()
+
+            cursor.execute("""
+                INSERT INTO mensajes (
+                    contenido,
+                    fecha_envio,
+                    ip_cliente
+                )
+                VALUES (?, ?, ?)
+            """, (
                 contenido,
                 fecha_envio,
                 ip_cliente
-            )
-            VALUES (?, ?, ?)
-        """, (
-            contenido,
-            fecha_envio,
-            ip_cliente
-        ))
+            ))
 
-        conexion.commit()
+            conexion.commit()
 
-    finally:
-        conexion.close()
-
-
+        finally:
+            conexion.close()

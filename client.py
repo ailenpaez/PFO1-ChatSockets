@@ -34,7 +34,9 @@ def enviar_mensajes(cliente):
             "(o 'éxito' para salir): "
         ).strip()
 
-        if mensaje.lower() == "éxito":
+        # se aceptan ambas formas por si el usuario no puede escribir la tilde
+        # CASE SENSITIVE!
+        if mensaje.lower() in ("éxito", "exito"):
 
             print("Cerrando cliente...")
 
@@ -85,7 +87,7 @@ def main():
         )
 
         print(
-            "Verificá que servidor.py "
+            "Verificá que server.py "
             "se encuentre ejecutándose."
         )
 

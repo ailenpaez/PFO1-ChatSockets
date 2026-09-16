@@ -1,5 +1,6 @@
 import socket
 import sqlite3
+import threading
 
 from datetime import datetime
 
@@ -18,6 +19,14 @@ def inicializar_socket():
         socket.SOCK_STREAM
     )
 
+    # permite reutilizar el puerto al reiniciar el servidor
+    # evita el error "Address already in use" por TIME_WAIT)
+    servidor.setsockopt(
+        socket.SOL_SOCKET,
+        socket.SO_REUSEADDR,
+        1
+    )
+
     # localhost+puerto
     servidor.bind((HOST, PORT))
 
@@ -34,6 +43,8 @@ def atender_cliente(conexion, direccion):
     """
     Recibe múltiples mensajes de un cliente mientras
     la conexión permanezca abierta.
+
+    Se ejecuta en un hilo propio por cada cliente.
     """
 
     ip_cliente = direccion[0]
@@ -124,6 +135,9 @@ def atender_cliente(conexion, direccion):
 def aceptar_conexiones(servidor):
     """
     Mantiene al servidor esperando conexiones.
+
+    Cada cliente aceptado se delega a un hilo separado,
+    así el servidor puede atender a varios a la vez.
     """
 
     print("=" * 50)
@@ -139,10 +153,16 @@ def aceptar_conexiones(servidor):
             # accept() espera hasta que aparezca un cliente.
             conexion, direccion = servidor.accept()
 
-            atender_cliente(
-                conexion,
-                direccion
+            # cada cliente se atiende en su propio hilo.
+            # daemon=True hace que los hilos terminen
+            # automáticamente al cerrar el servidor.
+            hilo = threading.Thread(
+                target=atender_cliente,
+                args=(conexion, direccion),
+                daemon=True
             )
+
+            hilo.start()
 
         except socket.timeout:
 
