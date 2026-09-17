@@ -2,3 +2,7 @@
 data/chat.db
 __pycache__/
 *.pyc
+.pytest_cache/
+resultado_tests.txt
+resultado_integracion.txt
+resultado_unitarios.txt

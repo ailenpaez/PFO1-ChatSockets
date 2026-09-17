@@ -1,0 +1,31 @@
+@startuml arquitectura
+
+title Arquitectura del sistema
+
+top to bottom direction
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultTextAlignment center
+
+rectangle "server.py\n(hilo principal)\naccept() en loop" as Server
+
+rectangle "threading.Thread → atender_cliente()\n(uno por cliente)" as Thread
+
+rectangle "database.py\n\ndb_lock (Lock)\n\nguardar_mensaje()" as Database
+
+database "data/chat.db\n(SQLite)" as SQLite
+
+rectangle "client.py" as Client
+
+Server --> Thread : por cada conexión nueva
+
+Thread --> Database : contenido, fecha_envio,\nip_cliente
+
+Database --> SQLite : escritura protegida\npor db_lock
+
+Client --> Server : conecta por TCP\nPuerto 5000
+
+Server --> Client : "Mensaje recibido:\n<timestamp>"
+
+@enduml
