@@ -19,14 +19,6 @@ def inicializar_socket():
         socket.SOCK_STREAM
     )
 
-    # permite reutilizar el puerto al reiniciar el servidor
-    # evita el error "Address already in use" por TIME_WAIT)
-    servidor.setsockopt(
-        socket.SOL_SOCKET,
-        socket.SO_REUSEADDR,
-        1
-    )
-
     # localhost+puerto
     servidor.bind((HOST, PORT))
 
